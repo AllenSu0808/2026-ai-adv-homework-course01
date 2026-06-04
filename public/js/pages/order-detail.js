@@ -44,6 +44,23 @@ createApp({
     function handlePaySuccess() { simulatePay('success'); }
     function handlePayFail() { simulatePay('fail'); }
 
+    async function ecpayCheckout() {
+      if (!order.value || paying.value) return;
+      paying.value = true;
+      try {
+        const res = await apiFetch('/api/ecpay/checkout/' + order.value.id, {
+          method: 'POST',
+        });
+        // 用當前視窗提交 ECPay auto-submit form，導向綠界付款頁
+        const win = window.open('', '_self');
+        win.document.write(res.data.form);
+        win.document.close();
+      } catch (e) {
+        Notification.show(e?.data?.message || '建立付款失敗', 'error');
+        paying.value = false;
+      }
+    }
+
     onMounted(async function () {
       try {
         const res = await apiFetch('/api/orders/' + orderId);
@@ -55,6 +72,6 @@ createApp({
       }
     });
 
-    return { order, loading, paying, paymentResult, statusMap, paymentMessages, handlePaySuccess, handlePayFail };
+    return { order, loading, paying, paymentResult, statusMap, paymentMessages, handlePaySuccess, handlePayFail, ecpayCheckout };
   }
 }).mount('#app');

@@ -46,6 +46,14 @@ router.get('/orders', function (req, res) {
   renderFront(res, 'orders', { title: '我的訂單', pageScript: 'orders' });
 });
 
+router.get('/payment/complete', function (req, res) {
+  renderFront(res, 'payment-complete', {
+    title: '付款確認',
+    pageScript: 'payment-complete',
+    orderId: req.query.orderId || '',
+  });
+});
+
 router.get('/orders/:id', function (req, res) {
   renderFront(res, 'order-detail', {
     title: '訂單詳情',

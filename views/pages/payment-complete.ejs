@@ -1,0 +1,38 @@
+<div id="app" data-order-id="<%= orderId %>">
+
+  <!-- 載入中 -->
+  <div v-if="state === 'loading'" class="flex flex-col items-center justify-center py-24">
+    <div class="w-10 h-10 border-4 border-rose-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p class="text-text-secondary text-sm">正在確認付款狀態...</p>
+  </div>
+
+  <!-- 付款成功 -->
+  <div v-else-if="state === 'success'" class="flex flex-col items-center justify-center py-16">
+    <div class="w-16 h-16 bg-sage/10 rounded-full flex items-center justify-center mb-4">
+      <svg class="w-8 h-8 text-sage" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+    </div>
+    <h1 class="text-2xl font-bold text-text-primary mb-2" style="font-family: 'Noto Serif TC', serif;">付款成功</h1>
+    <p class="text-text-secondary text-sm mb-6">感謝您的訂購，我們將盡快為您處理。</p>
+    <p class="text-text-muted text-xs mb-8">{{ countdown }} 秒後自動返回訂單詳情...</p>
+    <a :href="'/orders/' + orderId" class="bg-rose-primary text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-rose-primary/90 transition-colors">
+      立即查看訂單
+    </a>
+  </div>
+
+  <!-- 查詢失敗或尚未付款 -->
+  <div v-else class="flex flex-col items-center justify-center py-16">
+    <div class="w-16 h-16 bg-apricot/10 rounded-full flex items-center justify-center mb-4">
+      <svg class="w-8 h-8 text-apricot" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 5a7 7 0 100 14A7 7 0 0012 5z"/>
+      </svg>
+    </div>
+    <h1 class="text-2xl font-bold text-text-primary mb-2" style="font-family: 'Noto Serif TC', serif;">付款確認中</h1>
+    <p class="text-text-secondary text-sm mb-8">{{ message }}</p>
+    <a :href="'/orders/' + orderId" class="bg-sage text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-sage/90 transition-colors">
+      查看訂單狀態
+    </a>
+  </div>
+
+</div>

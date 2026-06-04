@@ -163,6 +163,14 @@ function seedProducts() {
   insertMany(seedProducts);
 }
 
+function runMigrations() {
+  // 新增 ECPay 交易編號欄位（ALTER TABLE 若已存在則忽略）
+  try {
+    db.exec('ALTER TABLE orders ADD COLUMN ecpay_merchant_trade_no TEXT');
+  } catch (_) {}
+}
+
 initializeDatabase();
+runMigrations();
 
 module.exports = db;
