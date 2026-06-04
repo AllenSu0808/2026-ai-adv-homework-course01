@@ -37,6 +37,45 @@
     "defaultMode": "auto",
     "additionalDirectories": []
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/protect-files.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/auto-api-docs.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/auto-test.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/compact-reminder.sh"
+          }
+        ]
+      }
+    ]
+  },
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
@@ -48,7 +87,8 @@
         "*.npmjs.org",
         "*.github.com",
         "github.com",
-        "*.githubusercontent.com"
+        "*.githubusercontent.com",
+        "localhost:*"
       ]
     }
   }
