@@ -1,0 +1,83 @@
+{
+  // 啟用 JSON Schema 驗證，在編輯器中提供自動完成與欄位提示
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  // ── 模型與推理 ────────────────────────────────────────────────
+  // 覆蓋預設模型，直接影響回應品質與成本
+  "model": "claude-sonnet-4-6",
+  // 推理深度：low / medium / high，high 適合複雜重構，low 適合簡單任務
+  "effortLevel": "high",
+  // 預設是否開啟 extended thinking（顯示 Claude 推理過程）
+  "alwaysThinkingEnabled": false,
+
+  // ── 語言與輸出 ────────────────────────────────────────────────
+  // Claude 回應所使用的語言
+  "language": "繁體中文",
+  // 輸出風格：Concise（簡潔）/ Explanatory（說明）/ Pedagogical（教學）
+  "outputStyle": "concise",
+
+  // ── Git 與署名 ────────────────────────────────────────────────
+  // 是否在 system prompt 注入預設 git 指令說明（使用自訂 git workflow 時可關閉）
+  "includeGitInstructions": true,
+  "attribution": {
+    // 自訂 git commit 署名文字；設為空字串則隱藏 Claude 字眼
+    "commit": ""
+  },
+
+  // ── 權限（Permissions）────────────────────────────────────────
+  "permissions": {
+    // 允許自動執行的工具規則，無需每次手動確認
+    "allow": [
+      "Edit(~/.npm/**)",
+      "Read(~/.npm/**)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(npm audit *)",
+      "Bash(git status)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git branch *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git pull *)",
+      "Bash(git fetch *)"
+    ],
+    // 永久禁止執行的規則，保護機敏操作
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(git push *)",
+      "Bash(git reset --hard *)"
+    ],
+    // 每次都需手動確認的規則（介於全開與全擋之間）
+    "ask": [],
+    // 預設權限模式：default / acceptEdits / plan / auto（auto 可大幅減少互動次數）
+    "defaultMode": "auto",
+    // 額外允許 Claude 存取的工作目錄（monorepo 或多專案開發時使用）
+    "additionalDirectories": []
+  },
+
+  // ── 沙箱（Sandbox）───────────────────────────────────────────
+  "sandbox": {
+    // 啟用 Bash 沙箱隔離，多一層安全保護
+    "enabled": true,
+    // 沙箱啟用時自動核准所有 bash 指令，兼顧安全與效率
+    "autoAllowBashIfSandboxed": true,
+    // 不進入沙箱的指令（例如 docker 等與沙箱不相容的工具）
+    "excludedCommands": [],
+    "network": {
+      // 允許綁定本機 port（開發伺服器需要）
+      "allowLocalBinding": true,
+      // 沙箱內允許對外連線的域名白名單
+      "allowedDomains": [
+        "registry.npmjs.org",
+        "*.npmjs.org",
+        "*.github.com",
+        "github.com",
+        "*.githubusercontent.com"
+      ]
+    }
+  }
+}
