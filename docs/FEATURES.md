@@ -66,7 +66,7 @@
 | `/api/orders` | POST | JWT | 從購物車建立訂單 |
 | `/api/orders` | GET | JWT | 我的訂單列表 |
 | `/api/orders/:id` | GET | JWT | 訂單詳情 |
-| `/api/orders/:id/pay` | PATCH | JWT | 模擬付款 |
+| `/api/orders/:id/pay` | PATCH | JWT | 模擬付款（開發測試用） |
 
 **行為描述：**
 
@@ -75,6 +75,28 @@
 - `order_items` 儲存建立時的商品名稱與價格快照，後續商品更新不影響歷史訂單
 - 模擬付款：`action: 'success'` → status 改為 `paid`；`action: 'fail'` → status 改為 `failed`；僅 `pending` 狀態的訂單可付款
 - 訂單狀態：`pending`（待付款）→ `paid`（已付款）或 `failed`（付款失敗）
+- 真實金流付款請見 ECPay 章節；模擬付款端點僅供開發與整合測試使用
+
+---
+
+### 綠界 ECPay 金流（`/api/ecpay`）
+
+**狀態：✅ 完成**
+
+| 端點 | 方法 | 認證 | 說明 |
+|------|------|------|------|
+| `/api/ecpay/checkout/:orderId` | POST | JWT | 建立 ECPay 交易，回傳 HTML auto-submit form |
+| `/api/ecpay/status/:orderId` | GET | JWT | 主動查詢付款狀態（呼叫 QueryTradeInfo） |
+| `/api/ecpay/notify` | POST | 無 | ReturnURL stub（ECPay 伺服器回呼用，localhost 無法實際收到） |
+
+**行為描述：**
+
+- **建立交易（checkout）**：驗證訂單屬於當前使用者且狀態為 `pending`；生成唯一的 `MerchantTradeNo`（格式 `EC` + 10 位時間戳 + 8 位隨機大寫英數，共 20 字）儲存至 `orders.ecpay_merchant_trade_no`；組建 AIO 全方位金流必填參數並計算 CheckMacValue；回傳帶有隱藏欄位的 HTML 自動提交表單字串，前端以 `document.write()` 即時導向綠界付款頁
+- **查詢狀態（status）**：讀取訂單的 `ecpay_merchant_trade_no`，呼叫綠界 QueryTradeInfo/V5 API；若 `TradeStatus === '1'`（已付款）且訂單仍為 `pending`，更新訂單狀態為 `paid`；回傳 `{ status, paid: bool, tradeStatus, merchantTradeNo }`
+- **ReturnURL stub（notify）**：驗證 CheckMacValue（使用 timing-safe 比較），若 `RtnCode === '1'` 則更新訂單狀態；回應純文字 `1|OK`（ECPay 要求格式）；本地端運行時 ECPay 無法觸達此端點，付款確認主要依靠 status 端點的主動查詢
+- **localhost 限制因應**：由於 ECPay 伺服器無法向 localhost 發送 Server Notify，付款結果確認改為前端主動呼叫 `GET /api/ecpay/status/:orderId`；付款完成後 ClientBackURL 導回 `/payment/complete?orderId=xxx` 頁面，頁面自動觸發查詢
+- **CheckMacValue 計算**：`encodeURIComponent → %20→+ → ~→%7e → '→%27 → toLowerCase → 7 字元 .NET 替換 → SHA256 → toUpperCase`；驗證時使用 `crypto.timingSafeEqual` 防止 timing attack
+- 無需新增 npm 套件，所有 ECPay HTTP 通訊使用 Node.js 內建 `https`、`crypto`、`URLSearchParams` 模組
 
 ---
 
@@ -126,7 +148,8 @@
 | `/cart` | 購物車 | 購物車管理 |
 | `/checkout` | 結帳 | 填寫收件資訊 |
 | `/orders` | 訂單列表 | 我的訂單 |
-| `/orders/:id` | 訂單詳情 | 訂單資訊 |
+| `/orders/:id` | 訂單詳情 | 訂單資訊 + 付款操作 |
+| `/payment/complete` | 付款確認 | ECPay 付款完成後的落地頁，自動查詢付款狀態 |
 | `/login` | 登入/註冊 | 帳號登入與註冊 |
 | `/admin/products` | 後台商品管理 | 商品 CRUD 頁面 |
 | `/admin/orders` | 後台訂單管理 | 訂單查詢頁面 |
